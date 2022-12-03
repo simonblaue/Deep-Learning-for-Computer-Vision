@@ -238,7 +238,7 @@ def validate(dataloader, model, loss_fn, device, master_bar):
 
 
 def run_training(model, optimizer, loss_function, device, num_epochs, 
-                train_dataloader, val_dataloader, early_stopper=None, verbose=False):
+                train_dataloader, val_dataloader,scheduler, early_stopper=None, verbose=False):
     """Run model training.
 
     Args:
@@ -264,7 +264,6 @@ def run_training(model, optimizer, loss_function, device, num_epochs,
     start_time = time.time()
     master_bar = fastprogress.master_bar(range(num_epochs))
     train_losses, val_losses, train_accs, val_accs = [],[],[],[]
-
     for epoch in master_bar:
         # Train the model
         epoch_train_loss, epoch_train_acc = train(train_dataloader, optimizer, model, 
@@ -273,6 +272,8 @@ def run_training(model, optimizer, loss_function, device, num_epochs,
         epoch_val_loss, epoch_val_acc, confusion_matrix = validate(val_dataloader, 
                                                                    model, loss_function, 
                                                                    device, master_bar)
+        # Adapt the scheduler
+        scheduler.step()
 
         # Save loss and acc for plotting
         train_losses.append(epoch_train_loss)
